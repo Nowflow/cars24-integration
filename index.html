@@ -19,22 +19,53 @@
 
   <div id="swagger-ui"></div>
 
+  <script src="https://unpkg.com/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
   <script src="https://unpkg.com/swagger-ui-dist/swagger-ui-bundle.js"></script>
   <script>
     let ui;
 
-    function loadSwagger(url) {
-      if (ui) ui.destroy(); // remove previous Swagger instance
-      ui = SwaggerUIBundle({
-        url: url,
-        dom_id: '#swagger-ui',
-        presets: [SwaggerUIBundle.presets.apis],
-        layout: "BaseLayout"
-      });
+    async function loadSwagger(fileName) {
+      try {
+        // Fetch the YAML content directly
+        const response = await fetch(fileName);
+        if (!response.ok) {
+          throw new Error(`Failed to load ${fileName}: ${response.status}`);
+        }
+        const yamlContent = await response.text();
+        
+        if (ui) ui.destroy(); // remove previous Swagger instance
+        
+        ui = SwaggerUIBundle({
+          spec: jsyaml.load(yamlContent), // Parse YAML directly
+          dom_id: '#swagger-ui',
+          presets: [SwaggerUIBundle.presets.apis, SwaggerUIBundle.presets.standalone],
+          layout: "StandaloneLayout",
+          deepLinking: true,
+          showExtensions: true,
+          showCommonExtensions: true,
+          tryItOutEnabled: true
+        });
+      } catch (error) {
+        console.error('Error loading Swagger spec:', error);
+        document.getElementById('swagger-ui').innerHTML = `
+          <div style="padding: 20px; color: red; border: 1px solid red; margin: 20px 0;">
+            <h3>Error Loading API Documentation</h3>
+            <p>Failed to load ${fileName}. Please check:</p>
+            <ul>
+              <li>The file exists in the repository</li>
+              <li>GitHub Pages is properly configured</li>
+              <li>The YAML file is valid</li>
+            </ul>
+            <p><strong>Error:</strong> ${error.message}</p>
+          </div>
+        `;
+      }
     }
 
-    // Load first Swagger by default
-    loadSwagger('cars24.yaml');
+    // Load first Swagger by default when page loads
+    document.addEventListener('DOMContentLoaded', () => {
+      loadSwagger('cars24.yaml');
+    });
 
     // Change Swagger on dropdown selection
     document.getElementById('swagger-select').addEventListener('change', e => {
