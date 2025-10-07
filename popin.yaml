@@ -1,0 +1,398 @@
+openapi: 3.0.3
+info:
+  title: Partner Hub API
+  description: API for managing partner hub schedules
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@example.com
+
+servers:
+  - url: https://api.example.com
+    description: Production server
+  - url: https://staging.api.example.com
+    description: Staging server
+
+security:
+  - BearerAuth: []
+
+paths:
+  /api/v1/partner-hub/schedule:
+    post:
+      summary: Create a new schedule
+      description: Creates a new schedule with the provided details
+      operationId: createSchedule
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateScheduleRequest'
+            example:
+              schedule_time: "2023-10-15T20:00:00+05:30"
+              product_id: "PROD-12345"
+              product_name: "Car Inspection Service"
+              product_deeplink_url: "https://cars24.com/inspect/PROD-12345"
+              mobile_number: "+919876543210"
+              group_identifier: "GROUP-001"
+              retry_number: 3
+              retry_interval: 10
+      responses:
+        '201':
+          description: Schedule created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateScheduleResponse'
+              example:
+                schedule_id: 789012
+                status: 1
+                message: "Schedule created successfully"
+        '400':
+          description: Bad request - Invalid input data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: "validation_error"
+                message: "Invalid mobile number format"
+                details:
+                  - field: "mobile_number"
+                    error: "Must be a valid phone number"
+        '401':
+          description: Unauthorized - Invalid or missing bearer token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: "unauthorized"
+                message: "Invalid or missing bearer token"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/partner-hub/schedule/{schedule_id}:
+    put:
+      summary: Reschedule an existing schedule
+      description: Updates/reschedules an existing schedule with new details
+      operationId: rescheduleSchedule
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: schedule_id
+          in: path
+          required: true
+          description: The unique identifier of the schedule to reschedule
+          schema:
+            type: integer
+            example: 789012
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RescheduleRequest'
+            example:
+              schedule_time: "2023-10-16T21:30:00+05:30"
+              product_id: "PROD-12345"
+              product_name: "Car Inspection Service - Updated"
+              product_deeplink_url: "https://cars24.com/inspect/PROD-12345"
+              mobile_number: "+919876543210"
+              group_identifier: "GROUP-001"
+              retry_number: 2
+              retry_interval: 10
+      responses:
+        '200':
+          description: Schedule rescheduled successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RescheduleResponse'
+              example:
+                schedule_id: 789012
+                status: 1
+                message: "Schedule updated successfully"
+        '400':
+          description: Bad request - Invalid input data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized - Invalid or missing bearer token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Schedule not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: "not_found"
+                message: "Schedule with ID 789012 not found"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      summary: Cancel a schedule
+      description: Cancels/deletes an existing schedule
+      operationId: cancelSchedule
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: schedule_id
+          in: path
+          required: true
+          description: The unique identifier of the schedule to cancel
+          schema:
+            type: integer
+            example: 789012
+      responses:
+        '200':
+          description: Schedule cancelled successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CancelScheduleResponse'
+              example:
+                schedule_id: 789012
+                status: 1
+                message: "Schedule cancelled successfully"
+        '401':
+          description: Unauthorized - Invalid or missing bearer token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Schedule not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: "not_found"
+                message: "Schedule with ID 789012 not found"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Bearer token authentication
+
+  schemas:
+    CreateScheduleRequest:
+      type: object
+      required:
+        - schedule_time
+        - product_id
+        - product_name
+        - product_deeplink_url
+        - mobile_number
+        - group_identifier
+        - retry_number
+        - retry_interval
+      properties:
+        schedule_time:
+          type: string
+          format: date-time
+          description: Scheduled time in ISO8601 format
+          example: "2023-10-15T20:00:00+05:30"
+        product_id:
+          type: string
+          description: Unique identifier for the product
+          example: "PROD-12345"
+        product_name:
+          type: string
+          description: Name of the product
+          example: "Car Inspection Service"
+        product_deeplink_url:
+          type: string
+          format: uri
+          description: Deep link URL for the product
+          example: "https://cars24.com/inspect/PROD-12345"
+        mobile_number:
+          type: string
+          description: Mobile number for the schedule
+          pattern: '^[+]?[0-9]{10,15}$'
+          example: "+919876543210"
+        group_identifier:
+          type: string
+          description: Group identifier for the schedule
+          example: "GROUP-001"
+        retry_number:
+          type: integer
+          description: Number of retry attempts
+          minimum: 0
+          maximum: 10
+          example: 3
+        retry_interval:
+          type: integer
+          description: Retry interval in minutes
+          minimum: 1
+          maximum: 10080
+          example: 10
+
+    RescheduleRequest:
+      type: object
+      required:
+        - schedule_time
+        - product_id
+        - product_name
+        - product_deeplink_url
+        - mobile_number
+        - group_identifier
+        - retry_number
+        - retry_interval
+      properties:
+        schedule_time:
+          type: string
+          format: date-time
+          description: Scheduled time in ISO8601 format
+          example: "2023-10-16T21:30:00+05:30"
+        product_id:
+          type: string
+          description: Unique identifier for the product
+          example: "PROD-12345"
+        product_name:
+          type: string
+          description: Name of the product
+          example: "Car Inspection Service - Updated"
+        product_deeplink_url:
+          type: string
+          format: uri
+          description: Deep link URL for the product
+          example: "https://cars24.com/inspect/PROD-12345"
+        mobile_number:
+          type: string
+          description: Mobile number for the schedule
+          pattern: '^[+]?[0-9]{10,15}$'
+          example: "+919876543210"
+        group_identifier:
+          type: string
+          description: Group identifier for the schedule
+          example: "GROUP-001"
+        retry_number:
+          type: integer
+          description: Number of retry attempts
+          minimum: 0
+          maximum: 10
+          example: 2
+        retry_interval:
+          type: integer
+          description: Retry interval in minutes
+          minimum: 1
+          maximum: 10080
+          example: 10
+
+    CreateScheduleResponse:
+      type: object
+      required:
+        - schedule_id
+        - status
+        - message
+      properties:
+        schedule_id:
+          type: integer
+          description: Unique identifier for the created schedule
+          example: 789012
+        status:
+          type: integer
+          description: Status of the operation (1 = success, 0 = failure)
+          enum: [0, 1]
+          example: 1
+        message:
+          type: string
+          description: Success message
+          example: "Schedule created successfully"
+
+    RescheduleResponse:
+      type: object
+      required:
+        - schedule_id
+        - status
+        - message
+      properties:
+        schedule_id:
+          type: integer
+          description: Unique identifier for the rescheduled schedule
+          example: 789012
+        status:
+          type: integer
+          description: Status of the operation (1 = success, 0 = failure)
+          enum: [0, 1]
+          example: 1
+        message:
+          type: string
+          description: Success message
+          example: "Schedule updated successfully"
+
+    CancelScheduleResponse:
+      type: object
+      required:
+        - schedule_id
+        - status
+        - message
+      properties:
+        schedule_id:
+          type: integer
+          description: Unique identifier for the cancelled schedule
+          example: 789012
+        status:
+          type: integer
+          description: Status of the operation (1 = success, 0 = failure)
+          enum: [0, 1]
+          example: 1
+        message:
+          type: string
+          description: Success message
+          example: "Schedule cancelled successfully"
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          description: Error type
+          example: "validation_error"
+        message:
+          type: string
+          description: Error message
+          example: "Invalid input data"
+        details:
+          type: array
+          description: Detailed error information
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+                example: "mobile_number"
+              error:
+                type: string
+                example: "Must be a valid phone number"

@@ -1,0 +1,184 @@
+openapi: 3.0.3
+info:
+  title: Cars24 Integration API
+  description: API for Cars24 integration services
+  version: 1.0.0
+  contact:
+    name: Cars24 Development Team
+    email: dev@cars24.com
+servers:
+  - url: https://api.cars24.com/v1
+    description: Production server
+  - url: https://staging-api.cars24.com/v1
+    description: Staging server
+paths:
+  /agents/scrub:
+    post:
+      summary: Scrub agents to get online agents
+      description: Filter agents based on mobile number and group identifier to return only online agents
+      operationId: scrubAgents
+      tags:
+        - Agents
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - mobile_number
+                - group_identifier
+                - agents
+              properties:
+                mobile_number:
+                  type: string
+                  description: Mobile number to filter agents
+                  example: "+919876543210"
+                  pattern: "^\\+?[1-9]\\d{1,14}$"
+                group_identifier:
+                  type: string
+                  description: Group identifier for agent filtering
+                  example: "group_123"
+                  minLength: 1
+                agents:
+                  type: array
+                  description: Array of agent email addresses to check
+                  items:
+                    type: string
+                    format: email
+                    example: "agent@cars24.com"
+                  minItems: 1
+                  maxItems: 100
+            example:
+              mobile_number: "+919876543210"
+              group_identifier: "group_123"
+              agents:
+                - "agent1@cars24.com"
+                - "agent2@cars24.com"
+                - "agent3@cars24.com"
+      responses:
+        '200':
+          description: Successfully retrieved online agents (may be empty if no agents are online)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    description: Response status (1 for success, 0 for failure)
+                    enum: [0, 1]
+                    example: 1
+                  agents:
+                    type: array
+                    description: Array of online agent email addresses (empty if no agents are online)
+                    items:
+                      type: string
+                      format: email
+                      example: "agent1@cars24.com"
+              examples:
+                with_agents:
+                  summary: "Agents found online"
+                  value:
+                    status: 1
+                    agents:
+                      - "agent1@cars24.com"
+                      - "agent2@cars24.com"
+                no_agents:
+                  summary: "No agents online"
+                  value:
+                    status: 1
+                    agents: []
+        '400':
+          description: Bad request - Invalid input parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    description: Response status (1 for success, 0 for failure)
+                    enum: [0, 1]
+                    example: 0
+                  agents:
+                    type: array
+                    description: Empty array for error responses
+                    items:
+                      type: string
+                      format: email
+                    example: []
+        '401':
+          description: Unauthorized - Invalid or missing authentication
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    description: Response status (1 for success, 0 for failure)
+                    enum: [0, 1]
+                    example: 0
+                  agents:
+                    type: array
+                    description: Empty array for error responses
+                    items:
+                      type: string
+                      format: email
+                    example: []
+        '404':
+          description: Not found - Group identifier not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    description: Response status (1 for success, 0 for failure)
+                    enum: [0, 1]
+                    example: 0
+                  agents:
+                    type: array
+                    description: Empty array for error responses
+                    items:
+                      type: string
+                      format: email
+                    example: []
+      security:
+        - ApiKeyAuth: []
+        - BearerAuth: []
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key for authentication
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token for authentication
+  schemas:
+    Error:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            details:
+              type: array
+              items:
+                type: string
+tags:
+  - name: Agents
+    description: Operations related to agent management

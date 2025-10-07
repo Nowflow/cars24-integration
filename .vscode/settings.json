@@ -1,0 +1,5 @@
+{
+    "yaml.schemas": {
+        "openapi:v3": "file:///Users/ashwin/Developer/cars24-integration/popin.yaml"
+    }
+}
