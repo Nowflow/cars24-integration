@@ -116,9 +116,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/RescheduleResponse'
               example:
-                schedule_id: 789012
+                schedule_id: 789013
                 status: 1
-                message: "Schedule updated successfully"
+                message: "Schedule rescheduled with new ID successfully"
         '400':
           description: Bad request - Invalid input data
           content:
@@ -337,8 +337,8 @@ components:
       properties:
         schedule_id:
           type: integer
-          description: Unique identifier for the rescheduled schedule
-          example: 789012
+          description: New unique identifier for the rescheduled schedule
+          example: 789013
         status:
           type: integer
           description: Status of the operation (1 = success, 0 = failure)
@@ -347,7 +347,7 @@ components:
         message:
           type: string
           description: Success message
-          example: "Schedule updated successfully"
+          example: "Schedule rescheduled with new ID successfully"
 
     CancelScheduleResponse:
       type: object
