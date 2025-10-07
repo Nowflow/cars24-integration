@@ -177,13 +177,16 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/DeleteErrorResponse'
+              example:
+                error: "unauthorized"
+                message: "Invalid or missing bearer token"
         '404':
           description: Schedule not found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/DeleteErrorResponse'
               example:
                 error: "not_found"
                 message: "Schedule with ID 789012 not found"
@@ -192,7 +195,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/DeleteErrorResponse'
+              example:
+                error: "server_error"
+                message: "Internal server error"
 
 components:
   securitySchemes:
@@ -396,3 +402,18 @@ components:
               error:
                 type: string
                 example: "Must be a valid integer"
+
+    DeleteErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          description: Error type
+          example: "not_found"
+        message:
+          type: string
+          description: Error message
+          example: "Resource not found"
