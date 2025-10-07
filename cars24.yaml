@@ -149,6 +149,213 @@ paths:
       security:
         - ApiKeyAuth: []
         - BearerAuth: []
+  /schedule/notify:
+    post:
+      summary: Notify agents about a schedule and get scrubbed agents
+      description: Send notification to agents about a schedule and return only available agents
+      operationId: notifySchedule
+      tags:
+        - Schedule
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - schedule_id
+                - agents
+              properties:
+                schedule_id:
+                  type: string
+                  description: Unique identifier for the schedule
+                  example: "schedule_123"
+                  minLength: 1
+                agents:
+                  type: array
+                  description: Array of agent email addresses to notify
+                  items:
+                    type: string
+                    format: email
+                    example: "agent@cars24.com"
+                  minItems: 1
+                  maxItems: 100
+            example:
+              schedule_id: "schedule_123"
+              agents:
+                - "agent1@cars24.com"
+                - "agent2@cars24.com"
+                - "agent3@cars24.com"
+      responses:
+        '200':
+          description: Successfully notified agents and retrieved scrubbed agents (may be empty if no agents are available)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    description: Response status (1 for success, 0 for failure)
+                    enum: [0, 1]
+                    example: 1
+                  agents:
+                    type: array
+                    description: Array of scrubbed agent email addresses (empty if no agents are available)
+                    items:
+                      type: string
+                      format: email
+                      example: "agent1@cars24.com"
+              examples:
+                with_agents:
+                  summary: "Agents available for notification"
+                  value:
+                    status: 1
+                    agents:
+                      - "agent1@cars24.com"
+                      - "agent2@cars24.com"
+                no_agents:
+                  summary: "No agents available"
+                  value:
+                    status: 1
+                    agents: []
+        '400':
+          description: Bad request - Invalid input parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    description: Response status (1 for success, 0 for failure)
+                    enum: [0, 1]
+                    example: 0
+                  agents:
+                    type: array
+                    description: Empty array for error responses
+                    items:
+                      type: string
+                      format: email
+                    example: []
+        '401':
+          description: Unauthorized - Invalid or missing authentication
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    description: Response status (1 for success, 0 for failure)
+                    enum: [0, 1]
+                    example: 0
+                  agents:
+                    type: array
+                    description: Empty array for error responses
+                    items:
+                      type: string
+                      format: email
+                    example: []
+        '404':
+          description: Not found - Schedule ID not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    description: Response status (1 for success, 0 for failure)
+                    enum: [0, 1]
+                    example: 0
+                  agents:
+                    type: array
+                    description: Empty array for error responses
+                    items:
+                      type: string
+                      format: email
+                    example: []
+      security:
+        - ApiKeyAuth: []
+        - BearerAuth: []
+  /schedule/notify/end:
+    post:
+      summary: End schedule notification
+      description: Mark the end of a schedule notification process
+      operationId: endScheduleNotify
+      tags:
+        - Schedule
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - schedule_id
+              properties:
+                schedule_id:
+                  type: string
+                  description: Unique identifier for the schedule
+                  example: "schedule_123"
+                  minLength: 1
+            example:
+              schedule_id: "schedule_123"
+      responses:
+        '200':
+          description: Successfully ended schedule notification
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    description: Response status (1 for success, 0 for failure)
+                    enum: [0, 1]
+                    example: 1
+              example:
+                status: 1
+        '400':
+          description: Bad request - Invalid input parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    description: Response status (1 for success, 0 for failure)
+                    enum: [0, 1]
+                    example: 0
+        '401':
+          description: Unauthorized - Invalid or missing authentication
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    description: Response status (1 for success, 0 for failure)
+                    enum: [0, 1]
+                    example: 0
+        '404':
+          description: Not found - Schedule ID not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    description: Response status (1 for success, 0 for failure)
+                    enum: [0, 1]
+                    example: 0
+      security:
+        - ApiKeyAuth: []
+        - BearerAuth: []
 components:
   securitySchemes:
     ApiKeyAuth:
@@ -182,3 +389,5 @@ components:
 tags:
   - name: Agents
     description: Operations related to agent management
+  - name: Schedule
+    description: Operations related to schedule management and notifications
