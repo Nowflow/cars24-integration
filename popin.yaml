@@ -32,9 +32,11 @@ paths:
               $ref: '#/components/schemas/CreateScheduleRequest'
             example:
               schedule_time: "2023-10-15T20:00:00+05:30"
-              product_id: "PROD-12345"
-              product_name: "Car Inspection Service"
-              product_deeplink_url: "https://cars24.com/inspect/PROD-12345"
+              schedule_end_time: "2023-10-15T22:00:00+05:30"
+              meta:
+                product_id: "PROD-12345"
+                product_name: "Car Inspection Service"
+                product_deeplink_url: "https://cars24.com/inspect/PROD-12345"
               mobile_number: "+919876543210"
               group_identifier: "GROUP-001"
               retry_number: 3
@@ -57,6 +59,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
               example:
+                status: 0
                 error: "validation_error"
                 message: "Invalid input data"
                 details:
@@ -69,6 +72,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
               example:
+                status: 0
                 error: "unauthorized"
                 message: "Invalid or missing bearer token"
         '500':
@@ -77,6 +81,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              example:
+                status: 0
+                error: "server_error"
+                message: "Internal server error"
 
   /api/v1/partner-hub/schedule/{schedule_id}:
     put:
@@ -101,9 +109,11 @@ paths:
               $ref: '#/components/schemas/RescheduleRequest'
             example:
               schedule_time: "2023-10-16T21:30:00+05:30"
-              product_id: "PROD-12345"
-              product_name: "Car Inspection Service - Updated"
-              product_deeplink_url: "https://cars24.com/inspect/PROD-12345"
+              schedule_end_time: "2023-10-16T23:30:00+05:30"
+              meta:
+                product_id: "PROD-12345"
+                product_name: "Car Inspection Service - Updated"
+                product_deeplink_url: "https://cars24.com/inspect/PROD-12345"
               mobile_number: "+919876543210"
               group_identifier: "GROUP-001"
               retry_number: 2
@@ -125,12 +135,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              example:
+                status: 0
+                error: "validation_error"
+                message: "Invalid input data"
         '401':
           description: Unauthorized - Invalid or missing bearer token
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              example:
+                status: 0
+                error: "unauthorized"
+                message: "Invalid or missing bearer token"
         '404':
           description: Schedule not found
           content:
@@ -138,6 +156,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
               example:
+                status: 0
                 error: "not_found"
                 message: "Schedule with ID 789012 not found"
         '500':
@@ -146,6 +165,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              example:
+                status: 0
+                error: "server_error"
+                message: "Internal server error"
 
     delete:
       summary: Cancel a schedule
@@ -179,6 +202,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/DeleteErrorResponse'
               example:
+                status: 0
                 error: "unauthorized"
                 message: "Invalid or missing bearer token"
         '404':
@@ -188,6 +212,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/DeleteErrorResponse'
               example:
+                status: 0
                 error: "not_found"
                 message: "Schedule with ID 789012 not found"
         '500':
@@ -197,6 +222,76 @@ paths:
               schema:
                 $ref: '#/components/schemas/DeleteErrorResponse'
               example:
+                status: 0
+                error: "server_error"
+                message: "Internal server error"
+
+  /api/v1/partner-hub/agents:
+    get:
+      summary: Get online agents for a group
+      description: Retrieves a list of online agents for the specified group identifier
+      operationId: getOnlineAgents
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: group_identifier
+          in: query
+          required: true
+          description: Group identifier to filter agents
+          schema:
+            type: string
+            example: "GROUP-001"
+      responses:
+        '200':
+          description: List of online agents retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentsResponse'
+              example:
+                status: 1
+                agents:
+                  - "agent1@example.com"
+                  - "agent2@example.com"
+                  - "agent3@example.com"
+        '400':
+          description: Bad request - Invalid group identifier
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                status: 0
+                error: "validation_error"
+                message: "Invalid group identifier"
+        '401':
+          description: Unauthorized - Invalid or missing bearer token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                status: 0
+                error: "unauthorized"
+                message: "Invalid or missing bearer token"
+        '404':
+          description: Group not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                status: 0
+                error: "not_found"
+                message: "Group with identifier GROUP-001 not found"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                status: 0
                 error: "server_error"
                 message: "Internal server error"
 
@@ -213,9 +308,8 @@ components:
       type: object
       required:
         - schedule_time
-        - product_id
-        - product_name
-        - product_deeplink_url
+        - schedule_end_time
+        - meta
         - mobile_number
         - group_identifier
         - retry_number
@@ -226,19 +320,31 @@ components:
           format: date-time
           description: Scheduled time in ISO8601 format
           example: "2023-10-15T20:00:00+05:30"
-        product_id:
+        schedule_end_time:
           type: string
-          description: Unique identifier for the product
-          example: "PROD-12345"
-        product_name:
-          type: string
-          description: Name of the product
-          example: "Car Inspection Service"
-        product_deeplink_url:
-          type: string
-          format: uri
-          description: Deep link URL for the product
-          example: "https://cars24.com/inspect/PROD-12345"
+          format: date-time
+          description: Scheduled end time in ISO8601 format
+          example: "2023-10-15T22:00:00+05:30"
+        meta:
+          type: object
+          required:
+            - product_id
+            - product_name
+            - product_deeplink_url
+          properties:
+            product_id:
+              type: string
+              description: Unique identifier for the product
+              example: "PROD-12345"
+            product_name:
+              type: string
+              description: Name of the product
+              example: "Car Inspection Service"
+            product_deeplink_url:
+              type: string
+              format: uri
+              description: Deep link URL for the product
+              example: "https://cars24.com/inspect/PROD-12345"
         mobile_number:
           type: string
           description: Mobile number for the schedule
@@ -265,9 +371,8 @@ components:
       type: object
       required:
         - schedule_time
-        - product_id
-        - product_name
-        - product_deeplink_url
+        - schedule_end_time
+        - meta
         - mobile_number
         - group_identifier
         - retry_number
@@ -278,19 +383,31 @@ components:
           format: date-time
           description: Scheduled time in ISO8601 format
           example: "2023-10-16T21:30:00+05:30"
-        product_id:
+        schedule_end_time:
           type: string
-          description: Unique identifier for the product
-          example: "PROD-12345"
-        product_name:
-          type: string
-          description: Name of the product
-          example: "Car Inspection Service - Updated"
-        product_deeplink_url:
-          type: string
-          format: uri
-          description: Deep link URL for the product
-          example: "https://cars24.com/inspect/PROD-12345"
+          format: date-time
+          description: Scheduled end time in ISO8601 format
+          example: "2023-10-16T23:30:00+05:30"
+        meta:
+          type: object
+          required:
+            - product_id
+            - product_name
+            - product_deeplink_url
+          properties:
+            product_id:
+              type: string
+              description: Unique identifier for the product
+              example: "PROD-12345"
+            product_name:
+              type: string
+              description: Name of the product
+              example: "Car Inspection Service - Updated"
+            product_deeplink_url:
+              type: string
+              format: uri
+              description: Deep link URL for the product
+              example: "https://cars24.com/inspect/PROD-12345"
         mobile_number:
           type: string
           description: Mobile number for the schedule
@@ -379,9 +496,15 @@ components:
     ErrorResponse:
       type: object
       required:
+        - status
         - error
         - message
       properties:
+        status:
+          type: integer
+          description: Status of the operation (1 = success, 0 = failure)
+          enum: [0, 1]
+          example: 0
         error:
           type: string
           description: Error type
@@ -406,9 +529,15 @@ components:
     DeleteErrorResponse:
       type: object
       required:
+        - status
         - error
         - message
       properties:
+        status:
+          type: integer
+          description: Status of the operation (1 = success, 0 = failure)
+          enum: [0, 1]
+          example: 0
         error:
           type: string
           description: Error type
@@ -417,3 +546,22 @@ components:
           type: string
           description: Error message
           example: "Resource not found"
+
+    AgentsResponse:
+      type: object
+      required:
+        - status
+        - agents
+      properties:
+        status:
+          type: integer
+          description: Status of the operation (1 = success, 0 = failure)
+          enum: [1]
+          example: 1
+        agents:
+          type: array
+          description: List of online agent email addresses
+          items:
+            type: string
+            format: email
+            example: "agent1@example.com"
