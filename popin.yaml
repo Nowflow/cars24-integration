@@ -116,7 +116,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/RescheduleResponse'
               example:
-                schedule_id: 789013
+                schedule_id: 890123
                 status: 1
                 message: "Schedule rescheduled with new ID successfully"
         '400':
@@ -338,7 +338,7 @@ components:
         schedule_id:
           type: integer
           description: New unique identifier for the rescheduled schedule
-          example: 789013
+          example: 890123
         status:
           type: integer
           description: Status of the operation (1 = success, 0 = failure)
