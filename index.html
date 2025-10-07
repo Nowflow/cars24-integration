@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>API Docs</title>
+  <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist/swagger-ui.css">
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    select { margin-bottom: 20px; padding: 5px; font-size: 16px; }
+  </style>
+</head>
+<body>
+  <h1>API Documentation</h1>
+  <label for="swagger-select">Select API:</label>
+  <select id="swagger-select">
+    <option value="cars24.yaml">Cars24 API</option>
+    <option value="popin.yaml">Popin API</option>
+  </select>
+
+  <div id="swagger-ui"></div>
+
+  <script src="https://unpkg.com/swagger-ui-dist/swagger-ui-bundle.js"></script>
+  <script>
+    let ui;
+
+    function loadSwagger(url) {
+      if (ui) ui.destroy(); // remove previous Swagger instance
+      ui = SwaggerUIBundle({
+        url: url,
+        dom_id: '#swagger-ui',
+        presets: [SwaggerUIBundle.presets.apis],
+        layout: "BaseLayout"
+      });
+    }
+
+    // Load first Swagger by default
+    loadSwagger('cars24.yaml');
+
+    // Change Swagger on dropdown selection
+    document.getElementById('swagger-select').addEventListener('change', e => {
+      loadSwagger(e.target.value);
+    });
+  </script>
+</body>
+</html>
