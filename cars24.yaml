@@ -15,7 +15,7 @@ paths:
   /agents/scrub:
     post:
       summary: Scrub agents to get online agents
-      description: Filter agents based on call ID, schedule ID and user metadata to return only online agents
+      description: Filter agents based on call ID, optional schedule ID and user metadata to return only online agents
       operationId: scrubAgents
       tags:
         - Agents
@@ -27,7 +27,6 @@ paths:
               type: object
               required:
                 - call_id
-                - schedule_id
                 - meta
                 - agents
               properties:
@@ -38,7 +37,7 @@ paths:
                   minimum: 1
                 schedule_id:
                   type: integer
-                  description: Unique identifier for the schedule
+                  description: Optional unique identifier for the schedule
                   example: 789
                   minimum: 1
                 meta:
@@ -138,7 +137,7 @@ paths:
                       format: email
                     example: []
         '404':
-          description: Not found - Call ID or Schedule ID not found
+          description: Not found - Call ID not found
           content:
             application/json:
               schema:
