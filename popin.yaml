@@ -58,10 +58,10 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
               example:
                 error: "validation_error"
-                message: "Invalid mobile number format"
+                message: "Invalid input data"
                 details:
-                  - field: "mobile_number"
-                    error: "Must be a valid phone number"
+                  - field: "schedule_id"
+                    error: "Must be a valid integer"
         '401':
           description: Unauthorized - Invalid or missing bearer token
           content:
@@ -392,7 +392,7 @@ components:
             properties:
               field:
                 type: string
-                example: "mobile_number"
+                example: "schedule_id"
               error:
                 type: string
-                example: "Must be a valid phone number"
+                example: "Must be a valid integer"
