@@ -22,41 +22,82 @@
   <script src="https://unpkg.com/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
   <script src="https://unpkg.com/swagger-ui-dist/swagger-ui-bundle.js"></script>
   <script>
-    let ui;
+    let ui = null;
+
+    function clearSwaggerUI() {
+      const container = document.getElementById('swagger-ui');
+      if (ui && typeof ui.destroy === 'function') {
+        try {
+          ui.destroy();
+        } catch (e) {
+          console.warn('Error destroying previous UI instance:', e);
+        }
+      }
+      // Clear the container content as fallback
+      container.innerHTML = '<div style="text-align: center; padding: 20px;">Loading...</div>';
+      ui = null;
+    }
 
     async function loadSwagger(fileName) {
       try {
+        clearSwaggerUI();
+        
         // Fetch the YAML content directly
         const response = await fetch(fileName);
         if (!response.ok) {
-          throw new Error(`Failed to load ${fileName}: ${response.status}`);
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
         const yamlContent = await response.text();
         
-        if (ui) ui.destroy(); // remove previous Swagger instance
+        // Validate YAML content
+        let spec;
+        try {
+          spec = jsyaml.load(yamlContent);
+        } catch (yamlError) {
+          throw new Error(`Invalid YAML format: ${yamlError.message}`);
+        }
+        
+        if (!spec || typeof spec !== 'object') {
+          throw new Error('Invalid OpenAPI specification');
+        }
         
         ui = SwaggerUIBundle({
-          spec: jsyaml.load(yamlContent), // Parse YAML directly
+          spec: spec,
           dom_id: '#swagger-ui',
           presets: [SwaggerUIBundle.presets.apis, SwaggerUIBundle.presets.standalone],
           layout: "StandaloneLayout",
           deepLinking: true,
           showExtensions: true,
           showCommonExtensions: true,
-          tryItOutEnabled: true
+          tryItOutEnabled: true,
+          onComplete: function() {
+            console.log(`Successfully loaded ${fileName}`);
+          },
+          onFailure: function(error) {
+            console.error('SwaggerUI failed to render:', error);
+          }
         });
+        
       } catch (error) {
         console.error('Error loading Swagger spec:', error);
         document.getElementById('swagger-ui').innerHTML = `
-          <div style="padding: 20px; color: red; border: 1px solid red; margin: 20px 0;">
-            <h3>Error Loading API Documentation</h3>
-            <p>Failed to load ${fileName}. Please check:</p>
-            <ul>
-              <li>The file exists in the repository</li>
-              <li>GitHub Pages is properly configured</li>
-              <li>The YAML file is valid</li>
-            </ul>
+          <div style="padding: 20px; color: red; border: 1px solid red; margin: 20px 0; border-radius: 5px;">
+            <h3>❌ Error Loading API Documentation</h3>
+            <p><strong>Failed to load:</strong> ${fileName}</p>
             <p><strong>Error:</strong> ${error.message}</p>
+            <details style="margin-top: 15px;">
+              <summary style="cursor: pointer; font-weight: bold;">Troubleshooting Steps</summary>
+              <ul style="margin-top: 10px;">
+                <li>Verify the file exists in your repository</li>
+                <li>Check if GitHub Pages is properly configured</li>
+                <li>Ensure the YAML file has valid syntax</li>
+                <li>Try refreshing the page</li>
+                <li>Check browser console for additional errors</li>
+              </ul>
+            </details>
+            <button onclick="loadSwagger('${fileName}')" style="margin-top: 15px; padding: 8px 16px; background: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer;">
+              🔄 Retry Loading
+            </button>
           </div>
         `;
       }
@@ -64,7 +105,10 @@
 
     // Load first Swagger by default when page loads
     document.addEventListener('DOMContentLoaded', () => {
-      loadSwagger('cars24.yaml');
+      // Add a small delay to ensure all scripts are loaded
+      setTimeout(() => {
+        loadSwagger('cars24.yaml');
+      }, 100);
     });
 
     // Change Swagger on dropdown selection
