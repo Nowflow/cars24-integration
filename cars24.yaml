@@ -28,7 +28,6 @@ paths:
               required:
                 - call_id
                 - meta
-                - agents
               properties:
                 call_id:
                   type: integer
@@ -45,15 +44,6 @@ paths:
                   description: JSON object containing metadata
                   example: {"customer_id": "cust_123", "priority": "high", "location": "delhi"}
                   additionalProperties: true
-                agents:
-                  type: array
-                  description: Array of agent email addresses to check
-                  items:
-                    type: string
-                    format: email
-                    example: "agent@cars24.com"
-                  minItems: 1
-                  maxItems: 100
             example:
               call_id: 123456
               schedule_id: 789
@@ -61,10 +51,6 @@ paths:
                 customer_id: "cust_123"
                 priority: "high"
                 location: "delhi"
-              agents:
-                - "agent1@cars24.com"
-                - "agent2@cars24.com"
-                - "agent3@cars24.com"
       responses:
         '200':
           description: Successfully retrieved online agents (may be empty if no agents are online)
