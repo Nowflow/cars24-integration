@@ -7,6 +7,12 @@ info:
     name: API Support
     email: support@example.com
 
+tags:
+  - name: Schedule Management
+    description: APIs for managing schedules
+  - name: Agent Management
+    description: APIs for managing agents
+
 servers:
   - url: https://api.example.com
     description: Production server
@@ -22,6 +28,8 @@ paths:
       summary: Create a new schedule
       description: Creates a new schedule with the provided details
       operationId: createSchedule
+      tags:
+        - Schedule Management
       security:
         - BearerAuth: []
       requestBody:
@@ -91,6 +99,8 @@ paths:
       summary: Reschedule an existing schedule
       description: Updates/reschedules an existing schedule with new details
       operationId: rescheduleSchedule
+      tags:
+        - Schedule Management
       security:
         - BearerAuth: []
       parameters:
@@ -174,6 +184,8 @@ paths:
       summary: Cancel a schedule
       description: Cancels/deletes an existing schedule
       operationId: cancelSchedule
+      tags:
+        - Schedule Management
       security:
         - BearerAuth: []
       parameters:
@@ -231,6 +243,8 @@ paths:
       summary: Get online agents for a group
       description: Retrieves a list of online agents for the specified group identifier
       operationId: getOnlineAgents
+      tags:
+        - Agent Management
       security:
         - BearerAuth: []
       parameters:
@@ -284,6 +298,70 @@ paths:
                 status: 0
                 error: "not_found"
                 message: "Group with identifier GROUP-001 not found"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                status: 0
+                error: "server_error"
+                message: "Internal server error"
+
+    post:
+      summary: Create or update an agent
+      description: Creates a new agent or updates an existing agent. Creates group if not present, creates agent if not present, and adds agent to group. If agent exists with different group, updates agent to new group.
+      operationId: createAgent
+      tags:
+        - Agent Management
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAgentRequest'
+            example:
+              name: "John Doe"
+              email: "john.doe@example.com"
+              group_identifier: "GROUP-001"
+              group_name: "Customer Support Group"
+      responses:
+        '201':
+          description: Agent created or updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateAgentResponse'
+              example:
+                agent_id: 12345
+                status: 1
+                message: "Agent created and added to group successfully"
+        '400':
+          description: Bad request - Invalid input data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                status: 0
+                error: "validation_error"
+                message: "Invalid input data"
+                details:
+                  - field: "email"
+                    error: "Must be a valid email address"
+        '401':
+          description: Unauthorized - Invalid or missing bearer token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                status: 0
+                error: "unauthorized"
+                message: "Invalid or missing bearer token"
         '500':
           description: Internal server error
           content:
@@ -565,3 +643,56 @@ components:
             type: string
             format: email
             example: "agent1@example.com"
+
+    CreateAgentRequest:
+      type: object
+      required:
+        - name
+        - email
+        - group_identifier
+        - group_name
+      properties:
+        name:
+          type: string
+          description: Full name of the agent
+          minLength: 1
+          maxLength: 100
+          example: "John Doe"
+        email:
+          type: string
+          format: email
+          description: Email address of the agent
+          example: "john.doe@example.com"
+        group_identifier:
+          type: string
+          description: Unique identifier for the group
+          minLength: 1
+          maxLength: 50
+          example: "GROUP-001"
+        group_name:
+          type: string
+          description: Display name of the group
+          minLength: 1
+          maxLength: 100
+          example: "Customer Support Group"
+
+    CreateAgentResponse:
+      type: object
+      required:
+        - agent_id
+        - status
+        - message
+      properties:
+        agent_id:
+          type: integer
+          description: Unique identifier for the created or updated agent
+          example: 12345
+        status:
+          type: integer
+          description: Status of the operation (1 = success, 0 = failure)
+          enum: [0, 1]
+          example: 1
+        message:
+          type: string
+          description: Success message
+          example: "Agent created and added to group successfully"
