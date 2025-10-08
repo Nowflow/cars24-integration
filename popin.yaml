@@ -583,7 +583,6 @@ components:
         - name
         - email
         - group_identifier
-        - group_name
       properties:
         name:
           type: string
