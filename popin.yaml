@@ -373,6 +373,79 @@ paths:
                 error: "server_error"
                 message: "Internal server error"
 
+  /api/v1/partner-hub/agents/online:
+    post:
+      summary: Set agent online/offline status
+      description: Sets an agent's online or offline status
+      operationId: setAgentOnlineStatus
+      tags:
+        - Agent Management
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetAgentOnlineRequest'
+            example:
+              email: "agent@example.com"
+              online: 1
+      responses:
+        '200':
+          description: Agent status updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SetAgentOnlineResponse'
+              example:
+                status: 1
+        '400':
+          description: Bad request - Invalid input data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                status: 0
+                error: "validation_error"
+                message: "Invalid input data"
+                details:
+                  - field: "email"
+                    error: "Must be a valid email address"
+                  - field: "online"
+                    error: "Must be 0 or 1"
+        '401':
+          description: Unauthorized - Invalid or missing bearer token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                status: 0
+                error: "unauthorized"
+                message: "Invalid or missing bearer token"
+        '404':
+          description: Agent not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                status: 0
+                error: "not_found"
+                message: "Agent with email agent@example.com not found"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                status: 0
+                error: "server_error"
+                message: "Internal server error"
+
 components:
   securitySchemes:
     BearerAuth:
@@ -696,3 +769,31 @@ components:
           type: string
           description: Success message
           example: "Agent created and added to group successfully"
+
+    SetAgentOnlineRequest:
+      type: object
+      required:
+        - email
+        - online
+      properties:
+        email:
+          type: string
+          format: email
+          description: Email address of the agent
+          example: "agent@example.com"
+        online:
+          type: integer
+          description: Online status (1 = online, 0 = offline)
+          enum: [0, 1]
+          example: 1
+
+    SetAgentOnlineResponse:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: integer
+          description: Status of the operation (1 = success, 0 = failure)
+          enum: [0, 1]
+          example: 1

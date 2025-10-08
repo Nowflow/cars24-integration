@@ -158,6 +158,132 @@ paths:
       security:
         - ApiKeyAuth: []
         - BearerAuth: []
+
+  /agents/online:
+    post:
+      summary: Set agent online/offline status
+      description: Sets an agent's online or offline status
+      operationId: setAgentOnlineStatus
+      tags:
+        - Agents
+      security:
+        - ApiKeyAuth: []
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - online
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: Email address of the agent
+                  example: "agent@cars24.com"
+                online:
+                  type: integer
+                  description: Online status (1 = online, 0 = offline)
+                  enum: [0, 1]
+                  example: 1
+            example:
+              email: "agent@cars24.com"
+              online: 1
+      responses:
+        '200':
+          description: Agent status updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    description: Status of the operation (1 = success, 0 = failure)
+                    enum: [0, 1]
+                    example: 1
+              example:
+                status: 1
+        '400':
+          description: Bad request - Invalid input data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    description: Response status (1 for success, 0 for failure)
+                    enum: [0, 1]
+                    example: 0
+                  error:
+                    type: string
+                    description: Error message
+                    example: "Invalid input data"
+              example:
+                status: 0
+                error: "Invalid input data"
+        '401':
+          description: Unauthorized - Invalid or missing authentication
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    description: Response status (1 for success, 0 for failure)
+                    enum: [0, 1]
+                    example: 0
+                  error:
+                    type: string
+                    description: Error message
+                    example: "Unauthorized"
+              example:
+                status: 0
+                error: "Unauthorized"
+        '404':
+          description: Agent not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    description: Response status (1 for success, 0 for failure)
+                    enum: [0, 1]
+                    example: 0
+                  error:
+                    type: string
+                    description: Error message
+                    example: "Agent not found"
+              example:
+                status: 0
+                error: "Agent not found"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    description: Response status (1 for success, 0 for failure)
+                    enum: [0, 1]
+                    example: 0
+                  error:
+                    type: string
+                    description: Error message
+                    example: "Internal server error"
+              example:
+                status: 0
+                error: "Internal server error"
+
 components:
   securitySchemes:
     ApiKeyAuth:
