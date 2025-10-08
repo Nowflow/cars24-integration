@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, maximum-scale=1"
+    />
+    <title>Popin</title>
+  </head>
+
+  <body class="antialiased">
+    <br /><br /><br /><br /><br /><br /><br /><br /><br /><br />
+    <center><a href="#" onclick="Popin('open')"> Open widget </a></center>
+    <script>
+      let popIn = document.createElement("script");
+      popIn.setAttribute("src", "https://test.popin.to/js/widget.js");
+      document.body.appendChild(popIn);
+      popIn.onload = () => {
+        popInWidgetInit({
+          token: "51",
+          mode: "hidden",
+          type: 2,
+          groupId: 5211,
+          scheduleId: 778,
+          captured: {
+            mobile: "9792521396",
+            campaign: {
+              meta: {
+                customerId: "10084677757",
+              },
+              url: "https://www.cars24.com/sell-used-cars",
+            },
+          },
+        });
+      };
+
+      window.popinEvent = (event, data) => {
+        console.log("Popin Event", event, data);
+      };
+    </script>
+  </body>
+</html>
