@@ -39,13 +39,13 @@ paths:
             schema:
               $ref: '#/components/schemas/CreateScheduleRequest'
             example:
-              schedule_time: "2023-10-15T20:00:00+05:30"
+              schedule_start_time: "2023-10-15T20:00:00+05:30"
               schedule_end_time: "2023-10-15T22:00:00+05:30"
               meta:
                 product_id: "PROD-12345"
                 product_name: "Car Inspection Service"
                 product_deeplink_url: "https://cars24.com/inspect/PROD-12345"
-              mobile_number: "+919876543210"
+              name: "John Doe"
               group_identifier: "GROUP-001"
               retry_number: 3
               retry_interval: 10
@@ -118,13 +118,13 @@ paths:
             schema:
               $ref: '#/components/schemas/RescheduleRequest'
             example:
-              schedule_time: "2023-10-16T21:30:00+05:30"
+              schedule_start_time: "2023-10-16T21:30:00+05:30"
               schedule_end_time: "2023-10-16T23:30:00+05:30"
               meta:
                 product_id: "PROD-12345"
                 product_name: "Car Inspection Service - Updated"
                 product_deeplink_url: "https://cars24.com/inspect/PROD-12345"
-              mobile_number: "+919876543210"
+              name: "John Doe"
               group_identifier: "GROUP-001"
               retry_number: 2
               retry_interval: 10
@@ -239,76 +239,6 @@ paths:
                 message: "Internal server error"
 
   /api/v1/partner-hub/agents:
-    get:
-      summary: Get online agents for a group
-      description: Retrieves a list of online agents for the specified group identifier
-      operationId: getOnlineAgents
-      tags:
-        - Agent Management
-      security:
-        - BearerAuth: []
-      parameters:
-        - name: group_identifier
-          in: query
-          required: true
-          description: Group identifier to filter agents
-          schema:
-            type: string
-            example: "GROUP-001"
-      responses:
-        '200':
-          description: List of online agents retrieved successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AgentsResponse'
-              example:
-                status: 1
-                agents:
-                  - "agent1@example.com"
-                  - "agent2@example.com"
-                  - "agent3@example.com"
-        '400':
-          description: Bad request - Invalid group identifier
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-              example:
-                status: 0
-                error: "validation_error"
-                message: "Invalid group identifier"
-        '401':
-          description: Unauthorized - Invalid or missing bearer token
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-              example:
-                status: 0
-                error: "unauthorized"
-                message: "Invalid or missing bearer token"
-        '404':
-          description: Group not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-              example:
-                status: 0
-                error: "not_found"
-                message: "Group with identifier GROUP-001 not found"
-        '500':
-          description: Internal server error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-              example:
-                status: 0
-                error: "server_error"
-                message: "Internal server error"
-
     post:
       summary: Create or update an agent
       description: Creates a new agent or updates an existing agent. Creates group if not present, creates agent if not present, and adds agent to group. If agent exists with different group, updates agent to new group.
@@ -373,78 +303,6 @@ paths:
                 error: "server_error"
                 message: "Internal server error"
 
-  /api/v1/partner-hub/agents/online:
-    post:
-      summary: Set agent online/offline status
-      description: Sets an agent's online or offline status
-      operationId: setAgentOnlineStatus
-      tags:
-        - Agent Management
-      security:
-        - BearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SetAgentOnlineRequest'
-            example:
-              email: "agent@example.com"
-              online: 1
-      responses:
-        '200':
-          description: Agent status updated successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SetAgentOnlineResponse'
-              example:
-                status: 1
-        '400':
-          description: Bad request - Invalid input data
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-              example:
-                status: 0
-                error: "validation_error"
-                message: "Invalid input data"
-                details:
-                  - field: "email"
-                    error: "Must be a valid email address"
-                  - field: "online"
-                    error: "Must be 0 or 1"
-        '401':
-          description: Unauthorized - Invalid or missing bearer token
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-              example:
-                status: 0
-                error: "unauthorized"
-                message: "Invalid or missing bearer token"
-        '404':
-          description: Agent not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-              example:
-                status: 0
-                error: "not_found"
-                message: "Agent with email agent@example.com not found"
-        '500':
-          description: Internal server error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-              example:
-                status: 0
-                error: "server_error"
-                message: "Internal server error"
 
 components:
   securitySchemes:
@@ -458,18 +316,18 @@ components:
     CreateScheduleRequest:
       type: object
       required:
-        - schedule_time
+        - schedule_start_time
         - schedule_end_time
         - meta
-        - mobile_number
+        - name
         - group_identifier
         - retry_number
         - retry_interval
       properties:
-        schedule_time:
+        schedule_start_time:
           type: string
           format: date-time
-          description: Scheduled time in ISO8601 format
+          description: Scheduled start time in ISO8601 format
           example: "2023-10-15T20:00:00+05:30"
         schedule_end_time:
           type: string
@@ -496,11 +354,12 @@ components:
               format: uri
               description: Deep link URL for the product
               example: "https://cars24.com/inspect/PROD-12345"
-        mobile_number:
+        name:
           type: string
-          description: Mobile number for the schedule
-          pattern: '^[+]?[0-9]{10,15}$'
-          example: "+919876543210"
+          description: Name for the schedule
+          minLength: 1
+          maxLength: 100
+          example: "John Doe"
         group_identifier:
           type: string
           description: Group identifier for the schedule
@@ -521,18 +380,18 @@ components:
     RescheduleRequest:
       type: object
       required:
-        - schedule_time
+        - schedule_start_time
         - schedule_end_time
         - meta
-        - mobile_number
+        - name
         - group_identifier
         - retry_number
         - retry_interval
       properties:
-        schedule_time:
+        schedule_start_time:
           type: string
           format: date-time
-          description: Scheduled time in ISO8601 format
+          description: Scheduled start time in ISO8601 format
           example: "2023-10-16T21:30:00+05:30"
         schedule_end_time:
           type: string
@@ -559,11 +418,12 @@ components:
               format: uri
               description: Deep link URL for the product
               example: "https://cars24.com/inspect/PROD-12345"
-        mobile_number:
+        name:
           type: string
-          description: Mobile number for the schedule
-          pattern: '^[+]?[0-9]{10,15}$'
-          example: "+919876543210"
+          description: Name for the schedule
+          minLength: 1
+          maxLength: 100
+          example: "John Doe"
         group_identifier:
           type: string
           description: Group identifier for the schedule
@@ -770,30 +630,3 @@ components:
           description: Success message
           example: "Agent created and added to group successfully"
 
-    SetAgentOnlineRequest:
-      type: object
-      required:
-        - email
-        - online
-      properties:
-        email:
-          type: string
-          format: email
-          description: Email address of the agent
-          example: "agent@example.com"
-        online:
-          type: integer
-          description: Online status (1 = online, 0 = offline)
-          enum: [0, 1]
-          example: 1
-
-    SetAgentOnlineResponse:
-      type: object
-      required:
-        - status
-      properties:
-        status:
-          type: integer
-          description: Status of the operation (1 = success, 0 = failure)
-          enum: [0, 1]
-          example: 1
