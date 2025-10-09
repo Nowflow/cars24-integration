@@ -14,21 +14,20 @@
     <center><a href="#" onclick="Popin('open')"> Open widget </a></center>
     <script>
       let popIn = document.createElement("script");
-      popIn.setAttribute("src", "https://test.popin.to/js/widget.js");
+      popIn.setAttribute("src", "https://widget01.popin.to/js/widget.js");
       document.body.appendChild(popIn);
       popIn.onload = () => {
         popInWidgetInit({
-          token: "51",
+          token: "12975",
           mode: "hidden",
           type: 2,
-          groupId: 5211,
+          groupId: "GROUP-112",
           scheduleId: 778,
           captured: {
-            mobile: "9792521396",
+            name: "BOOKING_ID",
             campaign: {
-              meta: {
-                customerId: "10084677757",
-              },
+              callerId: "Anubhav",
+              customerId: "10084677757",
               url: "https://www.cars24.com/sell-used-cars",
             },
           },
@@ -36,7 +35,32 @@
       };
 
       window.popinEvent = (event, data) => {
-        console.log("Popin Event", event, data);
+        switch (event) {
+          case "popin_open":
+            console.log("Popin Event", event, data);
+            break;
+          case "popin_navigated":
+            console.log("Popin Event", event, data);
+            break;
+          case "popin_permission_given":
+            console.log("Popin Event", event, data);
+            break;
+          case "popin_permission_denied":
+            console.log("Popin Event", event, data);
+            break;
+          case "popin_call_start":
+            console.log("Popin Event", event, data);
+            break;
+          case "popin_call_end":
+            console.log("Popin Event", event, data);
+            break;
+          case "popin_expert_busy":
+            console.log("Popin Event", event, data);
+            break;
+          case "popin_close":
+            console.log("Popin Event", event, data);
+            break;
+        }
       };
     </script>
   </body>
