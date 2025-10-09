@@ -309,6 +309,74 @@ paths:
                 error: "server_error"
                 message: "Internal server error"
 
+    delete:
+      summary: Delete an agent
+      description: Deletes an agent by email address
+      operationId: deleteAgent
+      tags:
+        - Agent Management
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: email
+          in: query
+          required: true
+          description: Email address of the agent to delete
+          schema:
+            type: string
+            format: email
+            example: "john.doe@example.com"
+      responses:
+        '200':
+          description: Agent deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteAgentResponse'
+              example:
+                status: 1
+                message: "Agent deleted successfully"
+        '400':
+          description: Bad request - Invalid input data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                status: 0
+                error: "validation_error"
+                message: "Invalid email address"
+        '401':
+          description: Unauthorized - Invalid or missing bearer token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                status: 0
+                error: "unauthorized"
+                message: "Invalid or missing bearer token"
+        '404':
+          description: Agent not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                status: 0
+                error: "not_found"
+                message: "Agent with email john.doe@example.com not found"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                status: 0
+                error: "server_error"
+                message: "Internal server error"
+
 
 components:
   securitySchemes:
@@ -666,4 +734,20 @@ components:
           type: string
           description: Success message
           example: "Agent created and added to group successfully"
+
+    DeleteAgentResponse:
+      type: object
+      required:
+        - status
+        - message
+      properties:
+        status:
+          type: integer
+          description: Status of the operation (1 = success, 0 = failure)
+          enum: [0, 1]
+          example: 1
+        message:
+          type: string
+          description: Success message
+          example: "Agent deleted successfully"
 
