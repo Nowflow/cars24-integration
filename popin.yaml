@@ -42,9 +42,12 @@ paths:
               schedule_start_time: "2023-10-15T20:00:00+05:30"
               schedule_end_time: "2023-10-15T22:00:00+05:30"
               meta:
-                product_id: "PROD-12345"
-                product_name: "Car Inspection Service"
-                product_deeplink_url: "https://cars24.com/inspect/PROD-12345"
+                callerId: "CALLER-12345"
+                product:
+                  id: "PROD-12345"
+                  url: "https://cars24.com/inspect/PROD-12345"
+                  image: "https://cars24.com/images/prod-12345.jpg"
+                  name: "Car Inspection Service"
               name: "John Doe"
               group_identifier: "GROUP-001"
               retry_number: 3
@@ -121,9 +124,12 @@ paths:
               schedule_start_time: "2023-10-16T21:30:00+05:30"
               schedule_end_time: "2023-10-16T23:30:00+05:30"
               meta:
-                product_id: "PROD-12345"
-                product_name: "Car Inspection Service - Updated"
-                product_deeplink_url: "https://cars24.com/inspect/PROD-12345"
+                callerId: "CALLER-12345"
+                product:
+                  id: "PROD-12345"
+                  url: "https://cars24.com/inspect/PROD-12345"
+                  image: "https://cars24.com/images/prod-12345.jpg"
+                  name: "Car Inspection Service - Updated"
               name: "John Doe"
               group_identifier: "GROUP-001"
               retry_number: 2
@@ -337,23 +343,39 @@ components:
         meta:
           type: object
           required:
-            - product_id
-            - product_name
-            - product_deeplink_url
+            - callerId
+            - product
           properties:
-            product_id:
+            callerId:
               type: string
-              description: Unique identifier for the product
-              example: "PROD-12345"
-            product_name:
-              type: string
-              description: Name of the product
-              example: "Car Inspection Service"
-            product_deeplink_url:
-              type: string
-              format: uri
-              description: Deep link URL for the product
-              example: "https://cars24.com/inspect/PROD-12345"
+              description: Caller identifier
+              example: "CALLER-12345"
+            product:
+              type: object
+              required:
+                - id
+                - url
+                - image
+                - name
+              properties:
+                id:
+                  type: string
+                  description: Unique identifier for the product
+                  example: "PROD-12345"
+                url:
+                  type: string
+                  format: uri
+                  description: Deep link URL for the product
+                  example: "https://cars24.com/inspect/PROD-12345"
+                image:
+                  type: string
+                  format: uri
+                  description: Image URL for the product
+                  example: "https://cars24.com/images/prod-12345.jpg"
+                name:
+                  type: string
+                  description: Name of the product
+                  example: "Car Inspection Service"
         name:
           type: string
           description: Name for the schedule
@@ -401,23 +423,39 @@ components:
         meta:
           type: object
           required:
-            - product_id
-            - product_name
-            - product_deeplink_url
+            - callerId
+            - product
           properties:
-            product_id:
+            callerId:
               type: string
-              description: Unique identifier for the product
-              example: "PROD-12345"
-            product_name:
-              type: string
-              description: Name of the product
-              example: "Car Inspection Service - Updated"
-            product_deeplink_url:
-              type: string
-              format: uri
-              description: Deep link URL for the product
-              example: "https://cars24.com/inspect/PROD-12345"
+              description: Caller identifier
+              example: "CALLER-12345"
+            product:
+              type: object
+              required:
+                - id
+                - url
+                - image
+                - name
+              properties:
+                id:
+                  type: string
+                  description: Unique identifier for the product
+                  example: "PROD-12345"
+                url:
+                  type: string
+                  format: uri
+                  description: Deep link URL for the product
+                  example: "https://cars24.com/inspect/PROD-12345"
+                image:
+                  type: string
+                  format: uri
+                  description: Image URL for the product
+                  example: "https://cars24.com/images/prod-12345.jpg"
+                name:
+                  type: string
+                  description: Name of the product
+                  example: "Car Inspection Service - Updated"
         name:
           type: string
           description: Name for the schedule
