@@ -14,9 +14,9 @@ tags:
     description: APIs for managing agents
 
 servers:
-  - url: https://api.example.com
+  - url: https://widget01.popin.to
     description: Production server
-  - url: https://staging.api.example.com
+  - url: https://test.popin.to
     description: Staging server
 
 security:
